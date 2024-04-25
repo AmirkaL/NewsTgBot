@@ -15,7 +15,7 @@ def get_lenta_economic_news():
 
         for news_item in news_items:
             title_element = news_item.find('h3', class_='card-full-news__title')
-            link = news_item.get('href')  # Use .get() method instead of indexing to avoid KeyError
+            link = news_item.get('href')
             if title_element and link:
                 full_link = urljoin(url, link)
                 title = title_element.text.strip()
