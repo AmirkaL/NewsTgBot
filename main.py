@@ -6,7 +6,7 @@ from news_parser.rbk import get_rbk_economic_news
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import asyncio
 
-API_TOKEN = '6887740905:AAG-GfF1a0MqMXFPOFvMjQDuyA4w5PcToNQ'
+API_TOKEN = 'TOKEN'
 
 
 bot = Bot(token=API_TOKEN)
@@ -15,7 +15,7 @@ db = Database('bot.db')
 
 async def check_for_new_news_periodically():
     while True:
-        await asyncio.sleep(5)  # Проверка каждые 5 минут
+        await asyncio.sleep(300)  # Проверка каждые 5 минут
 
         # lenta.ru
         lenta_news = get_lenta_economic_news()
@@ -36,7 +36,7 @@ async def cmd_start(message: types.Message):
     start_message = (
         "Привет! Я бот для получения новостей. Вот мои команды:\n\n"
         "/get - Получить актуальные новости\n"
-        "/get_news - Получить новости из выбранного источника\n"
+        "/get_news - Получить новости из случайного источника\n"
         "/update_n - Обновить количество новостей\n"
         "/default - Показать/Сменить текущий источник новостей\n"
         "/subscribe - Подписаться на рассылку новостей\n"
@@ -90,8 +90,8 @@ async def cmd_update_n(message: types.Message):
         await message.reply("Пожалуйста, укажите количество новостей после команды /update_n.")
 
 
-# Обработчик команды /get_news
-@dp.message_handler(commands=['get_news'])
+# Обработчик команды /get
+@dp.message_handler(commands=['get'])
 async def cmd_get_news(message: types.Message):
     chat_id = message.chat.id
     default_source = db.get_user_default_source(chat_id)
@@ -113,14 +113,14 @@ async def cmd_get_news(message: types.Message):
             if default_source == "Лента.ру":
                 keyboard.add(InlineKeyboardButton(text="Посмотреть", url=item['link']))
             await message.answer(news_text, parse_mode="HTML", reply_markup=keyboard)
-        db.log_user_action(chat_id, f"/get_news {default_source}")
+        db.log_user_action(chat_id, f"/get {default_source}")
     else:
         await message.reply(f"Произошла ошибка при получении новостей с {default_source}.")
 
 import random
 
-# Обработчик команды /get
-@dp.message_handler(commands=['get'])
+# Обработчик команды /get_news
+@dp.message_handler(commands=['get_news'])
 async def cmd_get(message: types.Message):
     chat_id = message.chat.id
     news_count = db.get_user_news_count(chat_id) or 5
@@ -142,7 +142,7 @@ async def cmd_get(message: types.Message):
                 keyboard = InlineKeyboardMarkup()
                 keyboard.add(InlineKeyboardButton(text="Посмотреть", url=item['link']))
             await message.reply(news_text, parse_mode="HTML", reply_markup=keyboard)
-        db.log_user_action(chat_id, f"/get {random_source}")
+        db.log_user_action(chat_id, f"/get_news {random_source}")
     else:
         await message.reply(f"Произошла ошибка при получении новостей с {random_source}.")
 
